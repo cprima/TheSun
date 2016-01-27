@@ -21,11 +21,60 @@ d3.json("/data/data_SunriseSunsetTwoPlaces.json", function(error, json) {
     var dayLength = d3.select("#day-length").
       append("svg:svg").
       attr("width", width + padding * 2).
-      attr("height", height + padding * 2);
+      attr("height", height + padding * 2).
+      style("background-color", '#fdf6e3 ');
+//Pattern injection
+//http://stackoverflow.com/questions/28255621/how-to-implement-svg-pattern-via-d3js
+var defs = dayLength.append("defs")
+var amflag = [
+{"step": 1, "colorhex":"D90012"},
+{"step": 2, "colorhex":"0033A0"},
+{"step": 3, "colorhex":"F2A800"},
+];
+var pattern1 = dayLength.append("pattern").
+        attr({ id:"am", width:"24", height:"24", patternUnits:"userSpaceOnUse", patternTransform:"rotate(-0)"}).
+        selectAll("rect").
+        data(amflag).
+        enter().
+        append("rect").
+        attr( {x:"0", width:"24", height:"8"} );
+var pattern1Attribute = pattern1.
+    attr("y", function (d) { return (d.step * 8) - 8}).
+    style("fill", function (d) {return d.colorhex});
+var deflag = [
+{"step": 1, "colorhex":"000000"},
+{"step": 2, "colorhex":"ff0000"},
+{"step": 3, "colorhex":"ffff00"},
+];
+var pattern2 = dayLength.append("pattern").
+        attr({ id:"de", width:"24", height:"24", patternUnits:"userSpaceOnUse", patternTransform:"rotate(-0)"}).
+        selectAll("rect").
+        data(deflag).
+        enter().
+        append("rect").
+        attr( {x:"0", width:"24", height:"8"} );
+var pattern2Attribute = pattern2.
+    attr("y", function (d) { return (d.step * 8) - 8}).
+    style("fill", function (d) {return d.colorhex});
+//		.attr({ id:"hash4_4", width:"24", height:"24", patternUnits:"userSpaceOnUse", patternTransform:"rotate(-0)"})
+//	.append("rect")
+//		.attr({ id:"eins", x:"0", y:"0", width:"24", height:"8", fill:"#D90012" })
+//	.insert("rect", "eins")
+//		.attr({ id:"eins", x:"0", y:"8", width:"24", height:"8", fill:"#0033A0" });
+//red D90012 217-0-18
+//blue 0033A0 0-51-160
+//orange F2A800 242-168-0
 
     // create a group to hold the axis-related elements
     var axisGroup = dayLength.append("svg:g").
       attr("transform", "translate("+padding+","+padding+")");
+
+axisGroup.append("svg:rect").
+  attr("x", 0-padding).
+  attr("y", 0-padding).
+  attr("height", height+2*padding).
+  attr("width", width+2*padding).
+  attr("fill", "#fdf6e3");
 //
 // draw the x and y tick marks. Since they are behind the visualization, they
 // can be drawn all the way across it. Because the  has been
@@ -107,7 +156,7 @@ lineGroup.append("svg:rect").
   attr("y", 0).
   attr("height", height).
   attr("width", width).
-  attr("fill", "lightyellow");
+  attr("fill", "#eee8d5");
 //
 // The meat of the visualization is surprisingly simple. sunriseLine
 // and sunsetLine are areas (closed svg:path elements) that use the date
@@ -117,48 +166,26 @@ lineGroup.append("svg:rect").
     var sunriseLine = d3.svg.area().
       x(function(d) { return x( new Date(d.utc_datetime) ); }).
       y1(function(d) { dy = moment.tz(d.place1_next_rising, "UTC");
-        return y(new Date(dy.tz(mydata._place2.timezone).format("Y"), 0, 1, dy.tz(mydata._place2.timezone).format("h"), dy.tz(mydata._place2.timezone).format("m"))); }).
+        return y(new Date(dy.tz(mydata._place1.timezone).format("Y"), 0, 1, dy.tz(mydata._place1.timezone).format("h"), dy.tz(mydata._place1.timezone).format("m"))); }).
       interpolate("linear");
 
     lineGroup.
       append("svg:path").
       attr("d", sunriseLine(mydata.data)).
       style("fill-opacity", 1).
-      attr("fill", "steelblue");
-
-    var sunsetLine = d3.svg.area().
-      x(function(d) { return x( new Date(d.utc_datetime) ); }).
-      y0(height).
-      y1(function(d) { dy2 = moment.tz(d.place1_next_setting, "UTC"); 
-        return y(new Date(dy2.tz(mydata._place2.timezone).format("Y"), 0, 1, dy2.tz(mydata._place2.timezone).format("H"), dy2.tz(mydata._place2.timezone).format("m"))); }).
-      interpolate("linear");
-
-    lineGroup.append("svg:path").
-      attr("d", sunsetLine(mydata.data)).
-      style("fill-opacity", 1).
-      attr("fill", "steelblue");
-
-lineGroup.append("svg:line").
-  attr("x1", 0).
-  attr("y1", d3.round(y(new Date(2016, 0, 1, 12))) + 0.5).
-  attr("x2", width).
-  attr("y2", d3.round(y(new Date(2016, 0, 1, 12))) + 0.5).
-  attr("stroke", "lightgray");
+      attr("fill", "#586e75");
 
 
-//moment.tz("2013-11-18 11:55", "America/Toronto");
-//mydata._place2.timezone
     var sunriseLine2 = d3.svg.area().
       x(function(d) { return x( new Date(d.utc_datetime) ); }).
       y1(function(d) { dy = moment.tz(d.place2_next_rising, "UTC");
         return y(new Date(dy.tz(mydata._place2.timezone).format("Y"), 0, 1, dy.tz(mydata._place2.timezone).format("h"), dy.tz(mydata._place2.timezone).format("m"))); }).
       interpolate("linear");
-
     lineGroup.
       append("svg:path").
       attr("d", sunriseLine2(mydata.data)).
-      style("fill-opacity", .6).
-      attr("fill", "grey");
+      style("fill-opacity", 1).
+      attr("fill", "#073642");
 
     var sunsetLine2 = d3.svg.area().
       x(function(d) { return x( new Date(d.utc_datetime) ); }).
@@ -166,12 +193,88 @@ lineGroup.append("svg:line").
       y1(function(d) { dy2 = moment.tz(d.place2_next_setting, "UTC"); 
         return y(new Date(dy2.tz(mydata._place2.timezone).format("Y"), 0, 1, dy2.tz(mydata._place2.timezone).format("H"), dy2.tz(mydata._place2.timezone).format("m"))); }).
       interpolate("linear");
-
     lineGroup.append("svg:path").
       attr("d", sunsetLine2(mydata.data)).
-      style("fill-opacity", .6).
-      attr("fill", "grey");
+      style("fill-opacity", 1).
+      attr("fill", "#586e75");
 
+
+      var sunsetLine = d3.svg.area().
+      x(function(d) { return x( new Date(d.utc_datetime) ); }).
+      y0(height).
+      y1(function(d) { dy2 = moment.tz(d.place1_next_setting, "UTC"); 
+        return y(new Date(dy2.tz(mydata._place1.timezone).format("Y"), 0, 1, dy2.tz(mydata._place1.timezone).format("H"), dy2.tz(mydata._place1.timezone).format("m"))); }).
+      interpolate("linear");
+
+    lineGroup.append("svg:path").
+      attr("d", sunsetLine(mydata.data)).
+      style("fill-opacity", 1).
+      attr("fill", "#073642");
+
+var amlinesunrise = d3.svg.line().
+  x(function(d) { return x( new Date(d.utc_datetime) ); }).
+  y(function(d) { dy2 = moment.tz(d.place2_next_setting, "UTC"); 
+  return y(new Date(dy2.tz(mydata._place2.timezone).format("Y"), 0, 1, dy2.tz(mydata._place2.timezone).format("H"), 
+    dy2.tz(mydata._place2.timezone).format("m"))); });
+
+lineGroup.append("svg:path")
+  .attr("d", amlinesunrise(mydata.data))
+  .style("stroke-width", 2)
+  .style("stroke", "url(#am)")
+  .attr("fill", "none");
+//
+//
+//
+//
+
+var delinesunrise = d3.svg.line().
+  x(function(d) { return x( new Date(d.utc_datetime) ); }).
+  y(function(d) { dy2 = moment.tz(d.place1_next_rising, "UTC"); 
+  return y(new Date(dy2.tz(mydata._place1.timezone).format("Y"), 0, 1, dy2.tz(mydata._place1.timezone).format("H"), 
+    dy2.tz(mydata._place1.timezone).format("m"))); });
+
+lineGroup.append("svg:path")
+  .attr("d", delinesunrise(mydata.data))
+  .style("stroke-width", 2)
+  .style("stroke", "url(#de)")
+  .attr("fill", "none");
+
+var amlinesunrise = d3.svg.line().
+  x(function(d) { return x( new Date(d.utc_datetime) ); }).
+  y(function(d) { dy2 = moment.tz(d.place2_next_rising, "UTC"); 
+  return y(new Date(dy2.tz(mydata._place2.timezone).format("Y"), 0, 1, dy2.tz(mydata._place2.timezone).format("H"), 
+    dy2.tz(mydata._place2.timezone).format("m"))); });
+
+lineGroup.append("svg:path")
+  .attr("d", amlinesunrise(mydata.data))
+  .style("stroke-width", 2)
+  .style("stroke", "url(#am)")
+  .attr("fill", "none");
+
+var delinesunset = d3.svg.line().
+  x(function(d) { return x( new Date(d.utc_datetime) ); }).
+  y(function(d) { dy2 = moment.tz(d.place1_next_setting, "UTC"); 
+  return y(new Date(dy2.tz(mydata._place1.timezone).format("Y"), 0, 1, dy2.tz(mydata._place1.timezone).format("H"), 
+    dy2.tz(mydata._place1.timezone).format("m"))); });
+
+lineGroup.append("svg:path")
+  .attr("d", delinesunset(mydata.data))
+  .style("stroke-width", 2)
+  .style("stroke", "url(#de)")
+  .attr("fill", "none");
+
+var amlinesunset = d3.svg.line().
+  x(function(d) { return x( new Date(d.utc_datetime) ); }).
+  y(function(d) { dy2 = moment.tz(d.place2_next_setting, "UTC"); 
+  return y(new Date(dy2.tz(mydata._place2.timezone).format("Y"), 0, 1, dy2.tz(mydata._place2.timezone).format("H"), 
+    dy2.tz(mydata._place2.timezone).format("m"))); });
+
+lineGroup.append("svg:path")
+  .attr("d", amlinesunset(mydata.data))
+  .style("stroke-width", 2)
+  .style("stroke", "url(#am)")
+  .attr("fill", "none");
+  
 // finally, draw a line representing 12:00 across the entire
 // visualization
 lineGroup.append("svg:line").
@@ -181,7 +284,8 @@ lineGroup.append("svg:line").
   attr("y2", d3.round(y(new Date(2016, 0, 1, 12))) + 0.5).
   attr("stroke", "lightgray");
 //
-});
+
+}); //end json
 
 
 function yAxisLabel(d) {
